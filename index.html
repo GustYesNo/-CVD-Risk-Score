@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CVD Risk Score Calculator</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #f4f4f4; }
+        h1 { text-align: center; color: #333; }
+        .form-container {
+            max-width: 500px; margin: 0 auto; background-color: white;
+            padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        .form-container label { display: block; margin: 10px 0 5px; }
+        .form-container input, .form-container select {
+            width: 100%; padding: 8px; margin-bottom: 15px; border-radius: 5px; border: 1px solid #ddd;
+        }
+        .form-container button {
+            width: 100%; padding: 10px; background-color: #4CAF50; color: white;
+            border: none; border-radius: 5px; font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+    <h1>เครื่องคำนวณความเสี่ยงโรคหัวใจ</h1>
+    <div class="form-container">
+        <form id="cvdForm">
+            <label for="age">อายุ:</label>
+            <input type="number" id="age" name="age" required>
+            
+            <label for="sex">เพศ:</label>
+            <select id="sex" name="sex" required>
+                <option value="ชาย">ชาย</option>
+                <option value="หญิง">หญิง</option>
+            </select>
+            
+            <label for="waist">รอบเอว (cm):</label>
+            <input type="number" id="waist" name="waist" required>
+            
+            <label for="height">ส่วนสูง (cm):</label>
+            <input type="number" id="height" name="height" required>
+            
+            <label for="cholesterol">คอเลสเตอรอล (mg/dL):</label>
+            <input type="number" id="cholesterol" name="cholesterol" required>
+            
+            <label for="bloodPressure">ความดันโลหิต (mmHg):</label>
+            <input type="number" id="bloodPressure" name="bloodPressure" required>
+            
+            <label for="smoker">การสูบบุหรี่:</label>
+            <select id="smoker" name="smoker" required>
+                <option value="สูบบุหรี่">สูบบุหรี่</option>
+                <option value="ไม่สูบบุหรี่">ไม่สูบบุหรี่</option>
+            </select>
+            
+            <label for="diabetes">โรคเบาหวาน:</label>
+            <select id="diabetes" name="diabetes" required>
+                <option value="เป็นโรคเบาหวาน">เป็นโรคเบาหวาน</option>
+                <option value="ไม่เป็นโรคเบาหวาน">ไม่เป็นโรคเบาหวาน</option>
+            </select>
+            
+            <button type="submit">คำนวณความเสี่ยง</button>
+        </form>
+
+        <div id="result" style="display:none; margin-top: 20px;">
+            <h3>ผลการคำนวณ CVD Risk Score</h3>
+            <p id="resultMessage"></p>
+        </div>
+    </div>
+
+    <script>
+        function calculateCvdRisk(age, sex, waist, height, cholesterol, bloodPressure, smoker, diabetes) {
+            let score = 0;
+            let waistToHeight = waist / height;
+            
+            if (age >= 45) score += 2;
+            else if (age >= 35) score += 1;
+            
+            if (sex === 'ชาย' && waistToHeight > 0.53) score += 2;
+            if (sex === 'หญิง' && waistToHeight > 0.49) score += 2;
+            
+            if (cholesterol > 240) score += 3;
+            else if (cholesterol > 200) score += 2;
+            
+            if (bloodPressure > 140) score += 3;
+            else if (bloodPressure > 120) score += 2;
+            
+            if (smoker === 'สูบบุหรี่') score += 2;
+            if (diabetes === 'เป็นโรคเบาหวาน') score += 2;
+            
+            let riskLevel, advice;
+            if (score <= 4) {
+                riskLevel = "ต่ำ";
+                advice = "รักษาสุขภาพให้ดีและตรวจสุขภาพประจำปี";
+            } else if (score <= 8) {
+                riskLevel = "ปานกลาง";
+                advice = "ควรปรับพฤติกรรมการกินและออกกำลังกาย";
+            } else if (score <= 12) {
+                riskLevel = "สูง";
+                advice = "ควรปรึกษาแพทย์เพื่อวางแผนลดความเสี่ยง";
+            } else {
+                riskLevel = "สูงมาก";
+                advice = "รีบพบแพทย์และตรวจสุขภาพอย่างละเอียด";
+            }
+            
+            return `ผลการคำนวณ: คุณมีความเสี่ยงระดับ ${riskLevel}. ${advice}`;
+        }
+
+        document.getElementById('cvdForm').addEventListener('submit', function (event) {
+            event.preventDefault();
+
+            const age = parseInt(document.getElementById('age').value);
+            const sex = document.getElementById('sex').value;
+            const waist = parseFloat(document.getElementById('waist').value);
+            const height = parseFloat(document.getElementById('height').value);
+            const cholesterol = parseFloat(document.getElementById('cholesterol').value);
+            const bloodPressure = parseFloat(document.getElementById('bloodPressure').value);
+            const smoker = document.getElementById('smoker').value;
+            const diabetes = document.getElementById('diabetes').value;
+            
+            const resultMessage = calculateCvdRisk(age, sex, waist, height, cholesterol, bloodPressure, smoker, diabetes);
+            
+            document.getElementById('resultMessage').innerText = resultMessage;
+            document.getElementById('result').style.display = 'block';
+        });
+    </script>
+</body>
+</html>
